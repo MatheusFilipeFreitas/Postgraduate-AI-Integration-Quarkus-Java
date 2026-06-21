@@ -18,7 +18,7 @@ This repository is part of a postgraduate course on integrating AI into Java app
 
 - JDK 25+
 - [Ollama](https://ollama.com/download) installed and running locally
-- A compatible model pulled in Ollama (for example: `ollama pull llama3.2`)
+- The `qwen3:8b` model pulled in Ollama: `ollama pull qwen3:8b`
 
 ## Getting started
 
@@ -37,16 +37,23 @@ cd Postgraduate-AI-Integration-Quarkus-Java
 
 Quarkus Dev UI is available at [http://localhost:8080/q/dev/](http://localhost:8080/q/dev/) while running in dev mode.
 
-### 3. Configure Ollama (when AI endpoints are added)
+### 3. Ollama configuration
 
-Add the following to `src/main/resources/application.properties`:
+Ollama settings are defined in `src/main/resources/application.properties`:
 
 ```properties
-quarkus.langchain4j.ollama.base-url=http://localhost:11434
-quarkus.langchain4j.ollama.chat-model.model-id=llama3.2
+quarkus.langchain4j.ollama.base-url=http://localhost:11434/
+quarkus.langchain4j.ollama.chat-model.model-id=qwen3:8b
+quarkus.langchain4j.ollama.timeout=60s
 ```
 
-Adjust `model-id` to match the model you pulled with Ollama.
+| Property | Description |
+|----------|-------------|
+| `base-url` | Ollama server address (default local instance) |
+| `chat-model.model-id` | Model invoked by LangChain4j (`qwen3:8b`) |
+| `timeout` | Request timeout; fails if the model does not respond within 60s |
+
+Change `model-id` if you use a different Ollama model.
 
 ## Build and run
 
@@ -99,7 +106,8 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 .
 ├── pom.xml                          # Maven build and dependencies
 ├── src/main/docker/                 # Docker build files
-└── src/main/resources/              # Application configuration (to be added)
+└── src/main/resources/
+    └── application.properties       # Ollama / LangChain4j configuration
 ```
 
 ## Related documentation
