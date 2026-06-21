@@ -12,13 +12,15 @@ This repository is part of a postgraduate course on integrating AI into Java app
 | Quarkus | 3.36.3 |
 | LangChain4j (Quarkus extension) | 3.36.3 |
 | AI provider | Ollama (`quarkus-langchain4j-ollama`) |
+| RAG | Easy RAG (`quarkus-langchain4j-easy-rag`) |
 | Build tool | Maven |
 
 ## Prerequisites
 
 - JDK 25+
 - [Ollama](https://ollama.com/download) installed and running locally
-- The `qwen3:8b` model pulled in Ollama: `ollama pull qwen3:8b`
+- The `gemma3:4b` chat model pulled in Ollama: `ollama pull gemma3:4b`
+- The `nomic-embed-text` embedding model pulled in Ollama (required for Easy RAG): `ollama pull nomic-embed-text`
 
 ## Getting started
 
@@ -43,17 +45,36 @@ Ollama settings are defined in `src/main/resources/application.properties`:
 
 ```properties
 quarkus.langchain4j.ollama.base-url=http://localhost:11434/
-quarkus.langchain4j.ollama.chat-model.model-id=qwen3:8b
+quarkus.langchain4j.ollama.chat-model.model-id=gemma3:4b
 quarkus.langchain4j.ollama.timeout=60s
+
+quarkus.langchain4j.easy-rag.path=src/main/resources/rag
+quarkus.langchain4j.embedding-model.provider=ollama
+quarkus.langchain4j.ollama.embedding-model.model-name=nomic-embed-text
 ```
 
 | Property | Description |
 |----------|-------------|
 | `base-url` | Ollama server address (default local instance) |
-| `chat-model.model-id` | Model invoked by LangChain4j (`qwen3:8b`) |
+| `chat-model.model-id` | Chat model invoked by LangChain4j (`gemma3:4b`) |
 | `timeout` | Request timeout; fails if the model does not respond within 60s |
+| `easy-rag.path` | Directory with documents indexed by Easy RAG |
+| `embedding-model.provider` | Embedding backend (`ollama`) |
+| `embedding-model.model-name` | Ollama embedding model (`nomic-embed-text`) |
 
-Change `model-id` if you use a different Ollama model.
+Change `model-id` if you use a different Ollama chat model. Easy RAG with embeddings requires `nomic-embed-text` to be installed in Ollama (`ollama pull nomic-embed-text`).
+
+### 4. Travel agent API
+
+With the app running in dev mode, send a plain-text question to the travel agent:
+
+```shell
+curl -X POST http://localhost:8080/travel \
+  -H "Content-Type: text/plain" \
+  -d "What travel packages do you offer?"
+```
+
+The agent uses Easy RAG to answer from documents in `src/main/resources/rag/` (for example, `plans-travel.md` with package details).
 
 ## Build and run
 
@@ -104,10 +125,15 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 
 ```
 .
-├── pom.xml                          # Maven build and dependencies
+├── pom.xml
+├── src/main/java/com/mathffreitas/
+│   ├── TravelAgentAssistent.java    # LangChain4j AI service interface
+│   └── TravelAgentResource.java     # REST endpoint (POST /travel)
 ├── src/main/docker/                 # Docker build files
 └── src/main/resources/
-    └── application.properties       # Ollama / LangChain4j configuration
+    ├── application.properties       # Ollama / LangChain4j configuration
+    └── rag/
+        └── plans-travel.md          # Travel package knowledge base for Easy RAG
 ```
 
 ## Related documentation
