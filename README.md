@@ -12,7 +12,7 @@ This repository is part of a postgraduate course on integrating AI into Java app
 | Quarkus | 3.36.3 |
 | LangChain4j (Quarkus extension) | 3.36.3 |
 | AI provider | Ollama (`quarkus-langchain4j-ollama`) |
-| RAG | Easy RAG (`quarkus-langchain4j-easy-rag`) |
+| RAG | Easy RAG (`quarkus-langchain4j-easy-rag`) — see [docs/easy-rag.md](docs/easy-rag.md) |
 | Build tool | Maven |
 
 ## Prerequisites
@@ -39,30 +39,11 @@ cd Postgraduate-AI-Integration-Quarkus-Java
 
 Quarkus Dev UI is available at [http://localhost:8080/q/dev/](http://localhost:8080/q/dev/) while running in dev mode.
 
-### 3. Ollama configuration
+### 3. Ollama and Easy RAG configuration
 
-Ollama settings are defined in `src/main/resources/application.properties`:
+Ollama and Easy RAG settings are in `src/main/resources/application.properties`. At minimum you need a running Ollama instance, the chat and embedding models pulled, and documents under `src/main/resources/rag/`.
 
-```properties
-quarkus.langchain4j.ollama.base-url=http://localhost:11434/
-quarkus.langchain4j.ollama.chat-model.model-id=gemma3:4b
-quarkus.langchain4j.ollama.timeout=60s
-
-quarkus.langchain4j.easy-rag.path=src/main/resources/rag
-quarkus.langchain4j.embedding-model.provider=ollama
-quarkus.langchain4j.ollama.embedding-model.model-name=nomic-embed-text
-```
-
-| Property | Description |
-|----------|-------------|
-| `base-url` | Ollama server address (default local instance) |
-| `chat-model.model-id` | Chat model invoked by LangChain4j (`gemma3:4b`) |
-| `timeout` | Request timeout; fails if the model does not respond within 60s |
-| `easy-rag.path` | Directory with documents indexed by Easy RAG |
-| `embedding-model.provider` | Embedding backend (`ollama`) |
-| `embedding-model.model-name` | Ollama embedding model (`nomic-embed-text`) |
-
-Change `model-id` if you use a different Ollama chat model. Easy RAG with embeddings requires `nomic-embed-text` to be installed in Ollama (`ollama pull nomic-embed-text`).
+For the full property list, setup steps, tuning options (`max-segment-size`, `max-overlap-size`, embedding reuse), and guidance on when Easy RAG is preferable to a vector database, see **[docs/easy-rag.md](docs/easy-rag.md)**.
 
 ### 4. Travel agent API
 
@@ -74,7 +55,7 @@ curl -X POST http://localhost:8080/travel \
   -d "What travel packages do you offer?"
 ```
 
-The agent uses Easy RAG to answer from documents in `src/main/resources/rag/` (for example, `plans-travel.md` with package details).
+The agent uses Easy RAG to answer from documents in `src/main/resources/rag/` (for example, `plans-travel.md` with package details). See [docs/easy-rag.md](docs/easy-rag.md) for how ingestion and retrieval are configured.
 
 ## Build and run
 
@@ -125,6 +106,8 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 
 ```
 .
+├── docs/
+│   └── easy-rag.md                  # Easy RAG configuration and usage guide
 ├── pom.xml
 ├── src/main/java/com/mathffreitas/
 │   ├── TravelAgentAssistent.java    # LangChain4j AI service interface
@@ -138,8 +121,10 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 
 ## Related documentation
 
+- [Easy RAG configuration (this project)](docs/easy-rag.md)
 - [Quarkus guides](https://quarkus.io/guides/)
 - [Quarkus LangChain4j extension](https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html)
+- [Quarkus LangChain4j — Easy RAG](https://docs.quarkiverse.io/quarkus-langchain4j/dev/rag-easy-rag.html)
 - [LangChain4j Ollama integration](https://docs.langchain4j.dev/integrations/language-models/ollama)
 
 ## Author
