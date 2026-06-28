@@ -1,14 +1,13 @@
 package com.mathffreitas.travel.ai;
 
-import com.mathffreitas.travel.ai.tools.BookingTools;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
-import io.quarkiverse.langchain4j.ToolBox;
+import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
 
 // This annotation tells Quarkus to create a class that implements this interface
-@RegisterAiService(tools =  BookingTools.class)
+@RegisterAiService
 public interface TravelAgentAssistent {
 
     @SystemMessage("""
@@ -33,5 +32,6 @@ public interface TravelAgentAssistent {
         
         "Sorry, but I couldn't find any information related to your request. May I help you with something else related to our trip packages?"
     """)
+    @McpToolBox("booking")
     String chat(@MemoryId String memoryId, @UserMessage String userMessage);
 }

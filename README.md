@@ -1,8 +1,22 @@
 # Postgraduate AI Integration — Quarkus & Java
 
-Travel agency backend built with [Quarkus](https://quarkus.io/) and [LangChain4j](https://docs.langchain4j.dev/) for AI-powered features via [Ollama](https://ollama.com/).
+Travel agency backend built with [Quarkus](https://quarkus.io/) and [LangChain4j](https://docs.langchain4j.dev/) for AI-powered features via [Ollama](https://ollama.com/). Booking operations (lookup and cancellation) are delegated to a separate [booking-mcp-server](../booking-mcp-server/) over the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
 
 This repository is part of a postgraduate course on integrating AI into Java applications using modern cloud-native tooling.
+
+## Related project
+
+| Project | Role | Default port |
+|---------|------|--------------|
+| [booking-mcp-server](../booking-mcp-server/) | MCP server — booking tools | `8081` |
+| **travel-agency** (this repo) | AI travel agent — RAG + Ollama + MCP client | `8080` |
+
+```shell
+git clone git@github.com:MatheusFilipeFreitas/Postgraduate-MCP-Travel-Agent-Quarkus-Java.git booking-mcp-server
+git clone git@github.com:MatheusFilipeFreitas/Postgraduate-AI-Integration-Quarkus-Java.git travel-agency
+```
+
+**Start booking-mcp-server before travel-agency** so MCP tools are available when the agent handles booking questions.
 
 ## Tech stack
 
@@ -13,6 +27,7 @@ This repository is part of a postgraduate course on integrating AI into Java app
 | LangChain4j (Quarkus extension) | 3.36.3 |
 | AI provider | Ollama (`quarkus-langchain4j-ollama`) |
 | RAG | pgvector (`quarkus-langchain4j-pgvector`) — see [docs/pgvector.md](docs/pgvector.md) |
+| Booking tools | MCP client (`quarkus-langchain4j-mcp`) → [booking-mcp-server](../booking-mcp-server/) |
 | Database | PostgreSQL 16 + pgvector (`docker-compose.yml`) |
 | Build tool | Maven |
 
@@ -26,12 +41,14 @@ This repository is part of a postgraduate course on integrating AI into Java app
 
 ## Getting started
 
-### 1. Clone the repository
+### 1. Clone the repositories
 
 ```shell
 git clone git@github.com:MatheusFilipeFreitas/Postgraduate-AI-Integration-Quarkus-Java.git
 cd Postgraduate-AI-Integration-Quarkus-Java
 ```
+
+Also clone [booking-mcp-server](https://github.com/MatheusFilipeFreitas/Postgraduate-MCP-Travel-Agent-Quarkus-Java) alongside this project if you have not already.
 
 ### 2. Start PostgreSQL
 
@@ -39,31 +56,54 @@ cd Postgraduate-AI-Integration-Quarkus-Java
 docker compose up -d
 ```
 
-### 3. Run in dev mode
+### 3. Start the booking MCP server
+
+In the `booking-mcp-server` directory:
 
 ```shell
 ./mvnw quarkus:dev
 ```
 
-Quarkus Dev UI is available at [http://localhost:8080/q/dev/](http://localhost:8080/q/dev/) while running in dev mode.
+MCP endpoint: `http://localhost:8081/mcp/sse`
 
-### 4. Ollama and pgvector configuration
+### 4. Run travel-agency in dev mode
+
+```shell
+./mvnw quarkus:dev
+```
+
+Quarkus Dev UI: [http://localhost:8080/q/dev/](http://localhost:8080/q/dev/)
+
+### 5. Ollama and pgvector configuration
 
 Ollama and pgvector settings are in `src/main/resources/application.properties`. You need a running Ollama instance, PostgreSQL started via Docker Compose, the chat and embedding models pulled, and documents under `src/main/resources/rag/`.
 
+MCP client settings (booking server):
+
+```properties
+quarkus.langchain4j.mcp.booking.transport-type=http
+quarkus.langchain4j.mcp.booking.url=http://localhost:8081/mcp/sse
+```
+
 For the full property list, ingestion pipeline, and production guidance, see **[docs/pgvector.md](docs/pgvector.md)**. To compare this setup with the earlier Easy RAG approach, see **[docs/easy-rag-vs-pgvector.md](docs/easy-rag-vs-pgvector.md)**.
 
-### 5. Travel agent API
+### 6. Travel agent API
 
-With the app running in dev mode, send a plain-text question to the travel agent:
+With both services running, send a plain-text question to the travel agent:
 
 ```shell
+# RAG — travel packages
 curl -X POST http://localhost:8080/travel \
   -H "Content-Type: text/plain" \
   -d "What travel packages do you offer?"
+
+# MCP — booking lookup (requires booking-mcp-server on port 8081)
+curl -X POST http://localhost:8080/travel \
+  -H "Content-Type: text/plain" \
+  -d "What are the details of booking 12345?"
 ```
 
-The agent uses pgvector-backed RAG to answer from documents in `src/main/resources/rag/` (for example, `plans-travel.md` with package details). See [docs/pgvector.md](docs/pgvector.md) for how ingestion and retrieval are configured.
+The agent uses pgvector-backed RAG for package information and MCP tools from booking-mcp-server for reservations. See [booking-mcp-server README](../booking-mcp-server/README.md) for mock booking ids and cancellation rules.
 
 ## Build and run
 
@@ -112,7 +152,7 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 
 ## Project structure
 
-```
+```text
 .
 ├── docker-compose.yml               # PostgreSQL 16 + pgvector
 ├── docs/
@@ -122,7 +162,8 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 ├── pom.xml
 ├── src/main/java/com/mathffreitas/travel/
 │   ├── ai/
-│   │   └── TravelAgentAssistent.java    # LangChain4j AI service interface
+│   │   ├── TravelAgentAssistent.java    # LangChain4j AI service (@McpToolBox)
+│   │   └── config/ChatMemoryConfig.java
 │   ├── rag/
 │   │   ├── DocumentIngest.java        # Loads and embeds documents into PostgreSQL
 │   │   └── RagConfiguration.java      # Wires the retrieval augmentor
@@ -130,18 +171,20 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 │       └── TravelAgentResource.java   # REST endpoint (POST /travel)
 ├── src/main/docker/                 # Docker build files
 └── src/main/resources/
-    ├── application.properties       # Ollama / LangChain4j configuration
+    ├── application.properties       # Ollama, pgvector, MCP client configuration
     └── rag/
         └── plans-travel.md          # Travel package knowledge base for RAG
 ```
 
 ## Related documentation
 
+- [booking-mcp-server](../booking-mcp-server/README.md) — booking MCP server setup and tools
 - [pgvector configuration (this project)](docs/pgvector.md)
 - [Easy RAG vs pgvector (this project)](docs/easy-rag-vs-pgvector.md)
 - [Easy RAG configuration (earlier setup)](docs/easy-rag.md)
 - [Quarkus guides](https://quarkus.io/guides/)
 - [Quarkus LangChain4j extension](https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html)
+- [Quarkus LangChain4j — MCP integration](https://docs.quarkiverse.io/quarkus-langchain4j/dev/mcp.html)
 - [Quarkus LangChain4j — PGVector Document Store](https://docs.quarkiverse.io/quarkus-langchain4j/dev/rag-pgvector-store.html)
 - [LangChain4j Ollama integration](https://docs.langchain4j.dev/integrations/language-models/ollama)
 
