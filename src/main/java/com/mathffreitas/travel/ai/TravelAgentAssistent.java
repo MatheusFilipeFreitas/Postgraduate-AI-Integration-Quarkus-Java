@@ -1,12 +1,14 @@
-package com.mathffreitas;
+package com.mathffreitas.travel.ai;
 
+import com.mathffreitas.travel.ai.tools.BookingTools;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
+import io.quarkiverse.langchain4j.ToolBox;
 
 // This annotation tells Quarkus to create a class that implements this interface
-@RegisterAiService
+@RegisterAiService(tools =  BookingTools.class)
 public interface TravelAgentAssistent {
 
     @SystemMessage("""

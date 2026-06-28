@@ -1,4 +1,4 @@
-package com.mathffreitas;
+package com.mathffreitas.travel.rag;
 
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;

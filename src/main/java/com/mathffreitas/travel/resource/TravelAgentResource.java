@@ -1,5 +1,6 @@
-package com.mathffreitas;
+package com.mathffreitas.travel.resource;
 
+import com.mathffreitas.travel.ai.TravelAgentAssistent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;

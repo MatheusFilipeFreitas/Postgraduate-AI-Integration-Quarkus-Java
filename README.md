@@ -120,11 +120,14 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 │   ├── easy-rag-vs-pgvector.md      # Comparison of both RAG approaches
 │   └── pgvector.md                  # pgvector configuration and usage guide
 ├── pom.xml
-├── src/main/java/com/mathffreitas/
-│   ├── DocumentIngest.java          # Loads and embeds documents into PostgreSQL
-│   ├── RagConfiguration.java        # Wires the retrieval augmentor
-│   ├── TravelAgentAssistent.java    # LangChain4j AI service interface
-│   └── TravelAgentResource.java     # REST endpoint (POST /travel)
+├── src/main/java/com/mathffreitas/travel/
+│   ├── ai/
+│   │   └── TravelAgentAssistent.java    # LangChain4j AI service interface
+│   ├── rag/
+│   │   ├── DocumentIngest.java        # Loads and embeds documents into PostgreSQL
+│   │   └── RagConfiguration.java      # Wires the retrieval augmentor
+│   └── resource/
+│       └── TravelAgentResource.java   # REST endpoint (POST /travel)
 ├── src/main/docker/                 # Docker build files
 └── src/main/resources/
     ├── application.properties       # Ollama / LangChain4j configuration
