@@ -17,6 +17,6 @@ public class TravelAgentResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     public String ask(String message) {
-        return agentAssist.chat(message);
+        return agentAssist.chat("session-id", message);
     }
 }

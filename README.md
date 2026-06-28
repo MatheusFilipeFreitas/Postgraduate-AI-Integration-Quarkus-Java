@@ -12,7 +12,8 @@ This repository is part of a postgraduate course on integrating AI into Java app
 | Quarkus | 3.36.3 |
 | LangChain4j (Quarkus extension) | 3.36.3 |
 | AI provider | Ollama (`quarkus-langchain4j-ollama`) |
-| RAG | Easy RAG (`quarkus-langchain4j-easy-rag`) — see [docs/easy-rag.md](docs/easy-rag.md) |
+| RAG | pgvector (`quarkus-langchain4j-pgvector`) — see [docs/pgvector.md](docs/pgvector.md) |
+| Database | PostgreSQL 16 + pgvector (`docker-compose.yml`) |
 | Build tool | Maven |
 
 ## Prerequisites
@@ -20,7 +21,8 @@ This repository is part of a postgraduate course on integrating AI into Java app
 - JDK 25+
 - [Ollama](https://ollama.com/download) installed and running locally
 - The `gemma3:4b` chat model pulled in Ollama: `ollama pull gemma3:4b`
-- The `nomic-embed-text` embedding model pulled in Ollama (required for Easy RAG): `ollama pull nomic-embed-text`
+- The `nomic-embed-text` embedding model pulled in Ollama (required for RAG): `ollama pull nomic-embed-text`
+- Docker (for PostgreSQL + pgvector): `docker compose up -d`
 
 ## Getting started
 
@@ -31,7 +33,13 @@ git clone git@github.com:MatheusFilipeFreitas/Postgraduate-AI-Integration-Quarku
 cd Postgraduate-AI-Integration-Quarkus-Java
 ```
 
-### 2. Run in dev mode
+### 2. Start PostgreSQL
+
+```shell
+docker compose up -d
+```
+
+### 3. Run in dev mode
 
 ```shell
 ./mvnw quarkus:dev
@@ -39,13 +47,13 @@ cd Postgraduate-AI-Integration-Quarkus-Java
 
 Quarkus Dev UI is available at [http://localhost:8080/q/dev/](http://localhost:8080/q/dev/) while running in dev mode.
 
-### 3. Ollama and Easy RAG configuration
+### 4. Ollama and pgvector configuration
 
-Ollama and Easy RAG settings are in `src/main/resources/application.properties`. At minimum you need a running Ollama instance, the chat and embedding models pulled, and documents under `src/main/resources/rag/`.
+Ollama and pgvector settings are in `src/main/resources/application.properties`. You need a running Ollama instance, PostgreSQL started via Docker Compose, the chat and embedding models pulled, and documents under `src/main/resources/rag/`.
 
-For the full property list, setup steps, tuning options (`max-segment-size`, `max-overlap-size`, embedding reuse), and guidance on when Easy RAG is preferable to a vector database, see **[docs/easy-rag.md](docs/easy-rag.md)**.
+For the full property list, ingestion pipeline, and production guidance, see **[docs/pgvector.md](docs/pgvector.md)**. To compare this setup with the earlier Easy RAG approach, see **[docs/easy-rag-vs-pgvector.md](docs/easy-rag-vs-pgvector.md)**.
 
-### 4. Travel agent API
+### 5. Travel agent API
 
 With the app running in dev mode, send a plain-text question to the travel agent:
 
@@ -55,7 +63,7 @@ curl -X POST http://localhost:8080/travel \
   -d "What travel packages do you offer?"
 ```
 
-The agent uses Easy RAG to answer from documents in `src/main/resources/rag/` (for example, `plans-travel.md` with package details). See [docs/easy-rag.md](docs/easy-rag.md) for how ingestion and retrieval are configured.
+The agent uses pgvector-backed RAG to answer from documents in `src/main/resources/rag/` (for example, `plans-travel.md` with package details). See [docs/pgvector.md](docs/pgvector.md) for how ingestion and retrieval are configured.
 
 ## Build and run
 
@@ -106,25 +114,32 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 
 ```
 .
+├── docker-compose.yml               # PostgreSQL 16 + pgvector
 ├── docs/
-│   └── easy-rag.md                  # Easy RAG configuration and usage guide
+│   ├── easy-rag.md                  # Easy RAG configuration (earlier setup)
+│   ├── easy-rag-vs-pgvector.md      # Comparison of both RAG approaches
+│   └── pgvector.md                  # pgvector configuration and usage guide
 ├── pom.xml
 ├── src/main/java/com/mathffreitas/
+│   ├── DocumentIngest.java          # Loads and embeds documents into PostgreSQL
+│   ├── RagConfiguration.java        # Wires the retrieval augmentor
 │   ├── TravelAgentAssistent.java    # LangChain4j AI service interface
 │   └── TravelAgentResource.java     # REST endpoint (POST /travel)
 ├── src/main/docker/                 # Docker build files
 └── src/main/resources/
     ├── application.properties       # Ollama / LangChain4j configuration
     └── rag/
-        └── plans-travel.md          # Travel package knowledge base for Easy RAG
+        └── plans-travel.md          # Travel package knowledge base for RAG
 ```
 
 ## Related documentation
 
-- [Easy RAG configuration (this project)](docs/easy-rag.md)
+- [pgvector configuration (this project)](docs/pgvector.md)
+- [Easy RAG vs pgvector (this project)](docs/easy-rag-vs-pgvector.md)
+- [Easy RAG configuration (earlier setup)](docs/easy-rag.md)
 - [Quarkus guides](https://quarkus.io/guides/)
 - [Quarkus LangChain4j extension](https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html)
-- [Quarkus LangChain4j — Easy RAG](https://docs.quarkiverse.io/quarkus-langchain4j/dev/rag-easy-rag.html)
+- [Quarkus LangChain4j — PGVector Document Store](https://docs.quarkiverse.io/quarkus-langchain4j/dev/rag-pgvector-store.html)
 - [LangChain4j Ollama integration](https://docs.langchain4j.dev/integrations/language-models/ollama)
 
 ## Author
