@@ -1,6 +1,6 @@
 # Postgraduate AI Integration — Quarkus & Java
 
-Travel agency backend built with [Quarkus](https://quarkus.io/) and [LangChain4j](https://docs.langchain4j.dev/) for AI-powered features via [Ollama](https://ollama.com/). Booking operations (lookup and cancellation) are delegated to a separate [booking-mcp-server](../booking-mcp-server/) over the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+Travel agency backend built with [Quarkus](https://quarkus.io/) and [LangChain4j](https://docs.langchain4j.dev/) for AI-powered features via [Ollama](https://ollama.com/). Booking operations (lookup and cancellation) are delegated to a separate [booking-mcp-server](https://github.com/MatheusFilipeFreitas/Postgraduate-MCP-Travel-Agent-Quarkus-Java) over the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
 
 This repository is part of a postgraduate course on integrating AI into Java applications using modern cloud-native tooling.
 
@@ -8,7 +8,7 @@ This repository is part of a postgraduate course on integrating AI into Java app
 
 | Project | Role | Default port |
 |---------|------|--------------|
-| [booking-mcp-server](../booking-mcp-server/) | MCP server — booking tools | `8081` |
+| [booking-mcp-server](https://github.com/MatheusFilipeFreitas/Postgraduate-MCP-Travel-Agent-Quarkus-Java) | MCP server — booking tools | `8081` |
 | **travel-agency** (this repo) | AI travel agent — RAG + Ollama + MCP client | `8080` |
 
 ```shell
@@ -27,7 +27,7 @@ git clone git@github.com:MatheusFilipeFreitas/Postgraduate-AI-Integration-Quarku
 | LangChain4j (Quarkus extension) | 3.36.3 |
 | AI provider | Ollama (`quarkus-langchain4j-ollama`) |
 | RAG | pgvector (`quarkus-langchain4j-pgvector`) — see [docs/pgvector.md](docs/pgvector.md) |
-| Booking tools | MCP client (`quarkus-langchain4j-mcp`) → [booking-mcp-server](../booking-mcp-server/) |
+| Booking tools | MCP client (`quarkus-langchain4j-mcp`) → [booking-mcp-server](https://github.com/MatheusFilipeFreitas/Postgraduate-MCP-Travel-Agent-Quarkus-Java) |
 | Database | PostgreSQL 16 + pgvector (`docker-compose.yml`) |
 | Build tool | Maven |
 
@@ -103,7 +103,7 @@ curl -X POST http://localhost:8080/travel \
   -d "What are the details of booking 12345?"
 ```
 
-The agent uses pgvector-backed RAG for package information and MCP tools from booking-mcp-server for reservations. See [booking-mcp-server README](../booking-mcp-server/README.md) for mock booking ids and cancellation rules.
+The agent uses pgvector-backed RAG for package information and MCP tools from booking-mcp-server for reservations. See the [booking-mcp-server README](https://github.com/MatheusFilipeFreitas/Postgraduate-MCP-Travel-Agent-Quarkus-Java/blob/main/README.md) for mock booking ids and cancellation rules.
 
 ## Build and run
 
@@ -178,7 +178,7 @@ Dockerfiles are provided under `src/main/docker/` for JVM, legacy JAR, native, a
 
 ## Related documentation
 
-- [booking-mcp-server](../booking-mcp-server/README.md) — booking MCP server setup and tools
+- [booking-mcp-server](https://github.com/MatheusFilipeFreitas/Postgraduate-MCP-Travel-Agent-Quarkus-Java) — booking MCP server setup and tools
 - [pgvector configuration (this project)](docs/pgvector.md)
 - [Easy RAG vs pgvector (this project)](docs/easy-rag-vs-pgvector.md)
 - [Easy RAG configuration (earlier setup)](docs/easy-rag.md)
