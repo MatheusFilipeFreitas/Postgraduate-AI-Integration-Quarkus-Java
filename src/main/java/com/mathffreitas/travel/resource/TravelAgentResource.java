@@ -1,6 +1,8 @@
 package com.mathffreitas.travel.resource;
 
 import com.mathffreitas.travel.ai.TravelAgentAssistent;
+import com.mathffreitas.travel.ai.instructions.AssistentInstructions;
+import dev.langchain4j.guardrail.InputGuardrailException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -23,6 +25,10 @@ public class TravelAgentResource {
             String message,
             @HeaderParam("X-User-Name") @DefaultValue("Guest") String username
     ) {
-        return agentAssist.chat("session-id", message, username);
+        try {
+            return agentAssist.chat("session-id", message, username);
+        } catch (InputGuardrailException e) {
+            return AssistentInstructions.GuardrailFailureMessage.trim();
+        }
     }
 }
