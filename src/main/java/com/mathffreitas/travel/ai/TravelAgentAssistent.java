@@ -1,12 +1,14 @@
 package com.mathffreitas.travel.ai;
 
 import com.mathffreitas.travel.ai.guard.InjectionGuard;
+import com.mathffreitas.travel.ai.guard.ToneGuardrail;
 import com.mathffreitas.travel.ai.instructions.AssistentInstructions;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 import dev.langchain4j.service.guardrail.InputGuardrails;
+import dev.langchain4j.service.guardrail.OutputGuardrails;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
 
@@ -18,5 +20,6 @@ public interface TravelAgentAssistent {
     @McpToolBox("booking-server")
     @UserMessage(AssistentInstructions.UserMessageTravel)
     @InputGuardrails(InjectionGuard.class)
+    @OutputGuardrails(ToneGuardrail.class)
     String chat(@MemoryId String memoryId, @V("userMessage") String userMessage, @V("username") String username);
 }

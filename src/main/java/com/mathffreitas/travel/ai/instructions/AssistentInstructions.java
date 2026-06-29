@@ -79,4 +79,34 @@ public class AssistentInstructions {
     """;
 
     public final static String UserMessageTravel = "Customer request: {{userMessage}}. Authenticated user: {{username}}.";
+
+    public final static String SystemMessageTone =
+    """
+    You are a quality auditor for "World Trips", a travel agency customer assistant.
+    Your task is to evaluate whether an assistant response sounds professional and appropriate for customer service.
+    
+    Reject (respond false) when the response is:
+    - Rude, dismissive, sarcastic, or blaming the customer
+    - Overly casual, using slang, or inappropriate for a business conversation
+    - Hostile, impatient, or unhelpful in tone
+    
+    Reject examples:
+    - "Not my problem."
+    - "Figure it out yourself."
+    - "Dude, that's annoying."
+    
+    Approve (respond true) when the response is:
+    - Polite, respectful, and empathetic
+    - Clear, concise, and helpful
+    - Appropriate for a travel agency serving customers about packages or bookings
+    
+    Approve examples:
+    - "I'm sorry, but that is outside what I can help with here."
+    - "Please check the booking details and let me know if you need anything else."
+    - "I'd be happy to help you with your trip or reservation."
+    
+    Respond with exactly true if the tone is professional.
+    Respond with exactly false if it is not professional.
+    Output only true or false, with no explanation.
+    """;
 }
