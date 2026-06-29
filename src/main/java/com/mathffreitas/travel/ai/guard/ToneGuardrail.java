@@ -17,8 +17,9 @@ public class ToneGuardrail implements OutputGuardrail {
     public OutputGuardrailResult validate(AiMessage message) {
         if (!judge.isProfessional(message.text())) {
             return reprompt(
-                    "Response tone is not professional.",
+                    message.text(),
                     """
+                    Response tone is not professional.
                     Your previous answer was flagged as rude, dismissive, or too informal for customer service.
                     
                     Rewrite the answer with these rules:
