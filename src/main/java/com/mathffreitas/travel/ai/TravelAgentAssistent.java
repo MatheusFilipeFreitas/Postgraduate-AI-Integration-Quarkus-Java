@@ -3,6 +3,7 @@ package com.mathffreitas.travel.ai;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
 
@@ -32,6 +33,7 @@ public interface TravelAgentAssistent {
         
         "Sorry, but I couldn't find any information related to your request. May I help you with something else related to our trip packages?"
     """)
-    @McpToolBox("booking")
-    String chat(@MemoryId String memoryId, @UserMessage String userMessage);
+    @McpToolBox("booking-server")
+    @UserMessage("Customer request: {{userMessage}}. Authenticated user: {{username}}.")
+    String chat(@MemoryId String memoryId, @V("userMessage") String userMessage, @V("username") String username);
 }

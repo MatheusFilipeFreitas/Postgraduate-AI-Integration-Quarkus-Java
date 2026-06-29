@@ -38,6 +38,5 @@ public class DocumentIngest {
                 .build();
 
         ingestor.ingest(document);
-        System.out.println("Document ingested!");
     }
 }

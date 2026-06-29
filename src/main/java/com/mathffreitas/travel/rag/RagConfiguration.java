@@ -21,9 +21,6 @@ public class RagConfiguration {
 
     @Produces
     public RetrievalAugmentor retrievalAugmentor() {
-
-        System.out.println(">>> Creating RetrievalAugmentor");
-
         return DefaultRetrievalAugmentor.builder()
                 .contentRetriever(
                         EmbeddingStoreContentRetriever.builder()

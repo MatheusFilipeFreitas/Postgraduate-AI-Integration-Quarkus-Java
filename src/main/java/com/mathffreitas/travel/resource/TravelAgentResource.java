@@ -3,6 +3,8 @@ package com.mathffreitas.travel.resource;
 import com.mathffreitas.travel.ai.TravelAgentAssistent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -17,7 +19,10 @@ public class TravelAgentResource {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public String ask(String message) {
-        return agentAssist.chat("session-id", message);
+    public String ask(
+            String message,
+            @HeaderParam("X-User-Name") @DefaultValue("Guest") String username
+    ) {
+        return agentAssist.chat("session-id", message, username);
     }
 }
